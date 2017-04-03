@@ -1,0 +1,41 @@
+options{ LOOKAHEAD=1;}
+
+PARSER_BEGIN(Autoanalyze)
+public class Autoanalyze{
+public static void main(String[] args) throws ParseException{
+try{
+Autoanalyze tree = new Autoanalyze(System.in);
+System.out.println("accept");
+}catch(Exception e){System.out.println("reject");}
+}
+}
+PARSER_END(Autoanalyze)
+
+SKIP:{" "|"\r"|"\t"|"\n"}
+
+TOKEN:{
+< VAR: (["A"-"Z"])(["A"-"Z""a"-"z""0"-"9"]|"_")* >|	//variable name (must start with a capital letter)
+< ASSIGN: ("=") >|									//varible assignement
+< CART: ("*") >|									//cartesian product
+< INTR: ("&") >|									//intersection
+< CMPL: ("~") >|									//complement
+< UNI: ("+") >|										//union
+< DIF: ("-") >|										//difference
+< OPEN: ("(") >|									//open parenthesis
+< CLOSE: (")") >|									//close parenthesis
+< END: (";") >|										//end statement
+< READ: ("read")>|									//read(PATH) returns a automata from the dotty file in PATH
+< WRITE: ("write") >|								//write(VAR,PATH) writes VAR into a dotty file in PATH
+< COMP: ("compare")>|								//compare(VAR,VAR) finds the  relational operator R so that VAR R VAR is true R€{==,!=,€}
+< TEST: ("test") >|									//test(VAR,PATH) tests every word in the PATH file with the VAR automata
+< REGX: ("regex") >|								//regex(VAR) return a regular expression with the same language as VAR
+< PATH: (\"^(.+)/([^/]+)$\")>						//path to file
+}
+
+SimpleNode Start():{}{Stmt()<EOF>{return jjtThis;}}
+
+void Stmt():{Token t;}{((Assign() | VoidFunction()) t=<END> Stmt())?}
+
+void Assign():{Token var,eq;}{var=<VAR> eq=<ASSIGN> Expr()}
+
+void VoidFunction():{}{}
