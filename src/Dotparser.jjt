@@ -8,7 +8,10 @@ import java.io.IOException;
 public class Dotparser{
 	public static void main(String[] args) throws ParseException{
 		try{
-			File file = new File("example.dotty");
+			if(args.length != 1){
+				System.exit(1);
+			}
+			File file = new File(args[0]);
 			FileInputStream input = new FileInputStream(file);
 			Dotparser tree = new Dotparser(input);
 			tree.Start();
