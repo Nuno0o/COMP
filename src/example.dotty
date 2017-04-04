@@ -1,0 +1,5 @@
+automata{
+	A1 -> A2 ['a','b'];
+	start[A1];
+	final[A2];
+}
