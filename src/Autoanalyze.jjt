@@ -5,6 +5,7 @@ public class Autoanalyze{
 	public static void main(String[] args) throws ParseException{
 		try{
 			Autoanalyze tree = new Autoanalyze(System.in);
+			tree.Start();
 			System.out.println("accept");
 		}catch(Exception e){System.out.println("reject");}
 	}
@@ -13,7 +14,9 @@ PARSER_END(Autoanalyze)
 
 SKIP:{" "|"\r"|"\t"|"\n"}
 
-TOKEN:{
+TOKEN:{	
+< START : ("{") >|									//begin
+< FINISH : ("}") >|									//end
 < VAR: (["A"-"Z"])(["A"-"Z","a"-"z","0"-"9"]|"_")* >|	//variable name (must start with a capital letter)
 < ASSIGN: ("=") >|									//varible assignement
 < CART: ("*") >|									//cartesian product
@@ -30,18 +33,18 @@ TOKEN:{
 < COMP: ("compare")>|								//compare(VAR,VAR) finds the  relational operator R so that VAR R VAR is true R€{==,!=,€}
 < TEST: ("test") >|									//test(VAR,PATH) tests every word in the PATH file with the VAR automata
 < REGX: ("regex") >|								//regex(VAR) return a regular expression with the same language as VAR
-< PATH: ("\"^(.+)/([^/]+)$\"")>						//path to file
+< PATH: (["A"-"Z","a"-"z","0"-"9","/"])*(["A"-"Z","a"-"z","0"-"9"])+ ("."(["A"-"Z","a"-"z","0"-"9"])+)? >//path to file
 }
 
-SimpleNode Start():{}{Stmt()<EOF>{return jjtThis;}}
+SimpleNode Start():{}{<START>Stmt()<FINISH>{return jjtThis;}}
 
-void Stmt():{Token t;}{(Assign())? Expr() | VoidFunction() t=<END> (Stmt())?}
+void Stmt():{Token t;}{(Assign())? (Expr() | Function()) t=<END> (Stmt())?}
 
 void Assign():{Token var,eq;}{var=<VAR> eq=<ASSIGN>}
 
-void Expr():{Token op1,op2,op;}{op1=<VAR> (op=<CART>|op=<INTR>|op=<CMPL>|op=<UNI>|op=<DIF>) (Expr())?}
+void Expr():{Token op1,op2,op;}{op1=<VAR> ((op=<CART>|op=<INTR>|op=<CMPL>|op=<UNI>|op=<DIF>) Expr())?}
 
-void VoidFunction():{}{(FuncRead() | FuncWrite() | FuncComp() | FuncTest() | FuncRegex())}
+void Function():{}{(FuncRead() | FuncWrite() | FuncComp() | FuncTest() | FuncRegex())}
 
 void FuncRead():{Token func,path;}{func=<READ> <OPEN> path=<PATH> <CLOSE>}
 
