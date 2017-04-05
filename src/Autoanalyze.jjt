@@ -18,7 +18,7 @@ TOKEN:{
 < START : ("{") >|									//begin
 < FINISH : ("}") >|									//end
 < VAR: (["A"-"Z"])(["A"-"Z","a"-"z","0"-"9"]|"_")* >|	//variable name (must start with a capital letter)
-< ASSIGN: ("=") >|									//varible assignement
+< ASSIGN: ("=") >|									//variable assignement
 < CART: ("*") >|									//cartesian product
 < INTR: ("&") >|									//intersection
 < CMPL: ("~") >|									//complement
