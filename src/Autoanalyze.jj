@@ -1,0 +1,112 @@
+options{
+	LOOKAHEAD=1;
+}
+
+PARSER_BEGIN(Autoanalyze)
+
+import java.io.*;
+import java.util.*;
+
+public class Autoanalyze{	
+
+	public static String str;
+	public static int stmt = 0;
+	
+	public static void main(String[] args){
+		
+		if(args.length != 1){
+			System.out.println("Usage: java Autoanalyze <path_to_file>");
+			return;
+		}
+		
+		File in = new File(args[0]);
+		
+		if(!in.exists() || !in.isFile()){
+			System.out.println("Invalid file: "+args[0]);
+			return;
+		}
+		
+		str = "public class " +in.getName() + "{\n";
+		str += "\tpublic static void main(String[] args){\n";
+		
+		System.out.print("Parsing "+in.getName()+" ... ");
+		
+		try{
+			Autoanalyze parser = new Autoanalyze(new FileInputStream(in));
+			parser.Start();
+			
+			
+			str += "\t}\n}";
+			System.out.println("Done!\n"+stmt+" statements in total.");
+			
+			//File out = new File(in.getName()+".java");
+			//FileUtils.writeStringToFile(out,str);	
+			
+		}catch(Exception e){
+		System.out.println("Rejected!");
+		e.printStackTrace();
+		}
+	}
+}
+
+PARSER_END(Autoanalyze)
+
+SKIP:{
+" "|
+"\t"|
+"\n"|
+"\r"
+}
+
+TOKEN:{
+<END_STMT:";">|
+<OPEN:"(">|
+<CLOSE:")">|
+<COMMA:",">|
+<VAR:(["A"-"Z"])(["A"-"Z","a"-"z","0"-"9"])*>|
+<ASSIGN:"=">|
+<UNARY_OP:("complement")>|
+<READ:"read">|
+<PATH:("\"")(~["\""])*("\"")>|
+<BINARY_OP:("union"|"concatenation"|"intersection"|"product"|"difference")>|
+<TEST:"test">|
+<COMPARE:"compare">|
+<INFO:"info">|
+<WRITE:"write">
+}
+
+void Start():{}{
+	(Stmt())*
+	<EOF>
+	{return jjtThis;}
+}
+
+void Stmt():{}{
+	(Assign()|NAssign()) <END_STMT>
+	{stmt++;}
+	//{str += ";\n";}
+}
+
+void Assign():{Token var;}{
+	var=<VAR> <ASSIGN> Expr()
+	//{str += "Automaton "+var.image + " = ";}
+}
+
+void Expr():{Token t;}{	
+
+	(t=<VAR>)|
+	(t=<UNARY_OP> <OPEN> Expr() <CLOSE>)|
+	(t=<BINARY_OP> <OPEN> Expr() <COMMA> Expr() <CLOSE>)|
+	(<READ> <OPEN> t=<PATH> <CLOSE>)
+
+}
+
+void NAssign():{Token t1,t2;}{
+	(
+		(<TEST> <OPEN> t1=<VAR> <COMMA> t2=<PATH>)|
+		(<COMPARE> <OPEN> t1=<VAR> <COMMA> t2=<VAR>)|
+		(<INFO> <OPEN> t1=<VAR>)|
+		(<WRITE> <OPEN> t1=<VAR> <COMMA> t2=<PATH>)
+	) <CLOSE>
+
+}
