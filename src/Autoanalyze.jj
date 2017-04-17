@@ -10,7 +10,14 @@ import java.util.*;
 public class Autoanalyze{	
 
 	public static String str;
-	public static int stmt = 0;
+	public static Set<String> vars;
+	public static File in;
+	public static File out;	
+	
+	public static void hasAssignedValue(Token t) throws Exception{	
+	if(!vars.contains(t.image))
+	throw new Exception(in.getName()+" l."+t.beginLine+": Uninitialized variable \""+t.image+"\"");		
+	}
 	
 	public static void main(String[] args){
 		
@@ -19,12 +26,14 @@ public class Autoanalyze{
 			return;
 		}
 		
-		File in = new File(args[0]);
+		in = new File(args[0]);
 		
 		if(!in.exists() || !in.isFile()){
 			System.out.println("Invalid file: "+args[0]);
 			return;
 		}
+		
+		vars = new HashSet<String>();
 		
 		str = "public class " +in.getName() + "{\n";
 		str += "\tpublic static void main(String[] args){\n";
@@ -37,7 +46,7 @@ public class Autoanalyze{
 			
 			
 			str += "\t}\n}";
-			System.out.println("Done!\n"+stmt+" statements in total.");
+			System.out.println("Done!");
 			
 			//File out = new File(in.getName()+".java");
 			//FileUtils.writeStringToFile(out,str);	
@@ -75,38 +84,36 @@ TOKEN:{
 <WRITE:"write">
 }
 
-void Start():{}{
+void Start() throws Exception:{}{
 	(Stmt())*
 	<EOF>
-	{return jjtThis;}
 }
 
-void Stmt():{}{
+void Stmt() throws Exception:{}{
 	(Assign()|NAssign()) <END_STMT>
-	{stmt++;}
-	//{str += ";\n";}
 }
 
-void Assign():{Token var;}{
+void Assign() throws Exception:{Token var;}{
 	var=<VAR> <ASSIGN> Expr()
+	{vars.add(var.image);}
 	//{str += "Automaton "+var.image + " = ";}
 }
 
-void Expr():{Token t;}{	
+void Expr() throws Exception:{Token t;}{	
 
-	(t=<VAR>)|
+	(t=<VAR>){hasAssignedValue(t);}|
 	(t=<UNARY_OP> <OPEN> Expr() <CLOSE>)|
 	(t=<BINARY_OP> <OPEN> Expr() <COMMA> Expr() <CLOSE>)|
 	(<READ> <OPEN> t=<PATH> <CLOSE>)
 
 }
 
-void NAssign():{Token t1,t2;}{
+void NAssign() throws Exception:{Token t1,t2;}{
 	(
-		(<TEST> <OPEN> t1=<VAR> <COMMA> t2=<PATH>)|
-		(<COMPARE> <OPEN> t1=<VAR> <COMMA> t2=<VAR>)|
-		(<INFO> <OPEN> t1=<VAR>)|
-		(<WRITE> <OPEN> t1=<VAR> <COMMA> t2=<PATH>)
+		(<TEST> <OPEN> t1=<VAR> <COMMA> t2=<PATH>){hasAssignedValue(t1);}|
+		(<COMPARE> <OPEN> t1=<VAR> <COMMA> t2=<VAR>){hasAssignedValue(t1);hasAssignedValue(t2);}|
+		(<INFO> <OPEN> t1=<VAR>){hasAssignedValue(t1);}|
+		(<WRITE> <OPEN> t1=<VAR> <COMMA> t2=<PATH>{hasAssignedValue(t1);})
 	) <CLOSE>
 
 }

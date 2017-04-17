@@ -1,20 +1,16 @@
-all:bin/Autoanalyze.class bin/DotParser.class
-
-bin/Autoanalyze.class:bin/Autoanalyze.java
+all:bin/Autoanalyze.java bin/DotParser.java
 	@mkdir -p bin
-	javac -o bin -cp "bin;lib/automaton.jar;lib/commons-io-2.5.jar" bin/Autoanalyze.java
+	javac -d bin -cp "bin;lib/automaton.jar;lib/commons-io-2.5.jar" bin/*.java
 	
 bin/Autoanalyze.java:src/Autoanalyze.jj
 	@mkdir -p bin
-	call javacc -o bin src/Autoanalyze.jj
-
-bin/DotParser.class:bin/DotParser.java
-	@mkdir -p bin
-	javac -o bin -cp "bin;lib/automaton.jar;lib/commons-io-2.5.jar" DotParser.java
-
+	java -cp lib/javacc.jar javacc src/Autoanalyze.jj
+	@mv *.java bin
+	
 bin/DotParser.java:src/DotParser.jj
 	@mkdir -p bin
-	call javacc -o bin src/DotParser.jj
+	java -cp lib/javacc.jar javacc src/DotParser.jj
+	@mv *.java bin
 	
 clean:
 	@rm -rf bin
