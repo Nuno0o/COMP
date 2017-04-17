@@ -1,3 +1,3 @@
 cd ../bin
-java Autoanalyze ../res/sample_code.aa
+java -cp ".;../lib/commons-io-2.5.jar" Autoanalyze ../res/sample_code
 read

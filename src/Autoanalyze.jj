@@ -6,6 +6,7 @@ PARSER_BEGIN(Autoanalyze)
 
 import java.io.*;
 import java.util.*;
+import org.apache.commons.io.*;
 
 public class Autoanalyze{	
 
@@ -24,32 +25,38 @@ public class Autoanalyze{
 		if(args.length != 1){
 			System.out.println("Usage: java Autoanalyze <path_to_file>");
 			return;
-		}
-		
+		}		
 		in = new File(args[0]);
 		
 		if(!in.exists() || !in.isFile()){
 			System.out.println("Invalid file: "+args[0]);
 			return;
-		}
+		}		
+		
+		String file_name = in.getName();
+		//if(file_name.contains(".")){
+		//	file_name = in.getName().split(".")[0];
+		//}
 		
 		vars = new HashSet<String>();
-		
-		str = "public class " +in.getName() + "{\n";
+		str = "import dk.brics.automaton.*;\n";
+		str += "import org.apache.commons.io.*;\n";		
+		str += "import java.io.*;\n\n";
+		str += "public class " + file_name + "{\n";
 		str += "\tpublic static void main(String[] args){\n";
+		str += "\t\ttry{\n";
 		
 		System.out.print("Parsing "+in.getName()+" ... ");
 		
 		try{
 			Autoanalyze parser = new Autoanalyze(new FileInputStream(in));
-			parser.Start();
+			parser.Start();			
 			
-			
-			str += "\t}\n}";
+			str += "\t\t}catch(Exception e){e.printStackTrace();}\n\t}\n}";
 			System.out.println("Done!");
 			
-			//File out = new File(in.getName()+".java");
-			//FileUtils.writeStringToFile(out,str);	
+			File out = new File(in.getParent()+"/"+file_name+".java");
+			FileUtils.writeStringToFile(out,str);	
 			
 		}catch(Exception e){
 		System.out.println("Rejected!");
@@ -90,30 +97,94 @@ void Start() throws Exception:{}{
 }
 
 void Stmt() throws Exception:{}{
+	{str += "\t\t\t";}
 	(Assign()|NAssign()) <END_STMT>
+	{str += ";\n";}
 }
 
 void Assign() throws Exception:{Token var;}{
-	var=<VAR> <ASSIGN> Expr()
-	{vars.add(var.image);}
-	//{str += "Automaton "+var.image + " = ";}
+	var=<VAR> <ASSIGN>
+	{
+		if(vars.add(var.image))
+			str += "Automaton ";
+		str += var.image + " = ";
+	}
+	Expr()
 }
 
 void Expr() throws Exception:{Token t;}{	
 
-	(t=<VAR>){hasAssignedValue(t);}|
-	(t=<UNARY_OP> <OPEN> Expr() <CLOSE>)|
-	(t=<BINARY_OP> <OPEN> Expr() <COMMA> Expr() <CLOSE>)|
-	(<READ> <OPEN> t=<PATH> <CLOSE>)
+	(
+		t=<VAR>
+		{hasAssignedValue(t);str += t.image;}
+	)|(
+		t=<UNARY_OP> <OPEN> 
+		{str += "BasicOperations.complement(";} 
+		Expr()
+		<CLOSE>
+		{str += ")";}
+	)|(
+		t=<BINARY_OP> <OPEN> 
+		{
+			str += "BasicOperations.";
+			switch(t.image){
+				case "union":
+				str += "union";
+				break;
+				case "concatenation":
+				str += "concatenate";
+				break;
+				case "intersection":
+				str += "intersection";
+				break;
+				case "product":
+				str += "product"; //falta implementar o produto
+				break;
+				case "difference":
+				str += "minus";
+				break;
+			}
+			str += "(";
+		} 
+		Expr() <COMMA>
+		{str += ",";}
+		Expr() <CLOSE>
+		{str += ")";}		
+	)|(
+		<READ> <OPEN> t=<PATH> <CLOSE>
+		{str += "DotParser.fromDot(new File("+t.image+"))";}
+	)
 
 }
 
 void NAssign() throws Exception:{Token t1,t2;}{
 	(
-		(<TEST> <OPEN> t1=<VAR> <COMMA> t2=<PATH>){hasAssignedValue(t1);}|
-		(<COMPARE> <OPEN> t1=<VAR> <COMMA> t2=<VAR>){hasAssignedValue(t1);hasAssignedValue(t2);}|
-		(<INFO> <OPEN> t1=<VAR>){hasAssignedValue(t1);}|
-		(<WRITE> <OPEN> t1=<VAR> <COMMA> t2=<PATH>{hasAssignedValue(t1);})
+		(
+			<TEST> <OPEN> t1=<VAR> <COMMA> t2=<PATH>
+			{
+				hasAssignedValue(t1);
+				str += "Utilities.test("+t1.image+",new File("+t2.image+"))";
+			}
+		)|(
+			<COMPARE> <OPEN> t1=<VAR> <COMMA> t2=<VAR>
+			{
+				hasAssignedValue(t1);
+				hasAssignedValue(t2);
+				str += "Utilities.compare("+t1.image+","+t2.image+")";
+			}
+		)|(
+			<INFO> <OPEN> t1=<VAR>
+			{
+				hasAssignedValue(t1);
+				str += t1.image+".getInfo()";
+			}
+		)|(
+			<WRITE> <OPEN> t1=<VAR> <COMMA> t2=<PATH>
+			{
+				hasAssignedValue(t1);
+				str += "FileUtils.writeStringToFile(new File("+t2.image+"),"+t1.image+".toDot())";
+			}
+		)
 	) <CLOSE>
 
 }

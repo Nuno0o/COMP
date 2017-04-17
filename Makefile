@@ -1,6 +1,6 @@
 all:bin/Autoanalyze.java bin/DotParser.java
 	@mkdir -p bin
-	javac -d bin -cp "bin;lib/automaton.jar;lib/commons-io-2.5.jar" bin/*.java
+	javac -d bin -cp "bin;lib/automaton.jar;lib/commons-io-2.5.jar" bin/*.java src/*.java
 	
 bin/Autoanalyze.java:src/Autoanalyze.jj
 	@mkdir -p bin

@@ -1,6 +1,7 @@
 B = read("../res/test2.dot");
 A = read("../res/test.dot");
 C = difference(union(A,B),intersection(A,B));
+A = C;
 info(C);
 write(C,"../res/c.dotty");
 test(A,"../res/wordlist.txt");
