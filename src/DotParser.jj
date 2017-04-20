@@ -1,7 +1,7 @@
 options{
 	LOOKAHEAD=2;
 	FORCE_LA_CHECK=true;
-	STATIC=false;
+	STATIC=true;
 }
 
 PARSER_BEGIN(DotParser)
@@ -15,6 +15,7 @@ public class DotParser{
 	static Automaton automaton;
 	static HashMap<String,State> states;
 	static State initial_state;
+	static DotParser parser = null;
 
 	public static Automaton fromDot(File f){
 		automaton = null;
@@ -22,7 +23,10 @@ public class DotParser{
 		initial_state = null;	
 		System.out.print("Parsing "+f.getName()+" ...");
 		try{
-			DotParser parser = new DotParser(new FileInputStream(f));
+			if(parser == null)
+				parser = new DotParser(new FileInputStream(f));
+			else
+				parser.ReInit(new FileInputStream(f));
 			parser.Start();
 			System.out.println("Done!");
 			automaton = new Automaton();

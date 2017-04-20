@@ -126,21 +126,25 @@ void Expr() throws Exception:{Token t;}{
 	)|(
 		t=<BINARY_OP> <OPEN> 
 		{
-			str += "BasicOperations.";
 			switch(t.image){
 				case "union":
+				str += "BasicOperations.";
 				str += "union";
 				break;
 				case "concatenation":
+				str += "BasicOperations.";
 				str += "concatenate";
 				break;
 				case "intersection":
+				str += "BasicOperations.";
 				str += "intersection";
 				break;
 				case "product":
-				str += "product"; //falta implementar o produto
+				str += "Utilities.";
+				str += "product";
 				break;
 				case "difference":
+				str += "BasicOperations.";
 				str += "minus";
 				break;
 			}
