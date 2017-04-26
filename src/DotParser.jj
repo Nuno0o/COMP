@@ -1,0 +1,121 @@
+options{
+	LOOKAHEAD=2;
+	FORCE_LA_CHECK=true;
+	STATIC=true;
+}
+
+PARSER_BEGIN(DotParser)
+
+import dk.brics.automaton.*;
+import java.io.*;
+import java.util.*;
+
+public class DotParser{
+
+	static Automaton automaton;
+	static HashMap<String,State> states;
+	static State initial_state;
+	static DotParser parser = null;
+
+	public static Automaton fromDot(File f){
+		automaton = null;
+		states = new HashMap<String,State>();
+		initial_state = null;	
+		System.out.print("Parsing "+f.getName()+" ...");
+		try{
+			if(parser == null)
+				parser = new DotParser(new FileInputStream(f));
+			else
+				parser.ReInit(new FileInputStream(f));
+			parser.Start();
+			System.out.println("Done!");
+			automaton = new Automaton();
+			automaton.setInitialState(initial_state);
+			
+		}catch(Exception e){
+		System.out.println("Rejected!");
+		e.printStackTrace();
+		}
+		return automaton;
+	}
+}
+
+PARSER_END(DotParser)
+
+SKIP:{" "|"\t"|"\r"}
+
+TOKEN:{
+<OPEN:"{">|
+<CLOSE:"}">|
+<OPEN_SQR:"[">|
+<CLOSE_SQR:"]">|
+<SHAPE_EQ:"shape=">|
+<SHAPE:("plaintext"|"circle"|"doublecircle")>|
+<LABEL_EQ:"label=">|
+<STATE:((["0"-"9"])+|"initial")>|
+<LABEL:("\"")(~[])?("\"")>|
+<RANKDIR:"rankdir = LR">|
+<END_STMT:";">|
+<TRANS:"->">|
+<START:"digraph Automaton">|
+<COMMA:",">|
+<LF:"\n">
+}
+
+void Start():{Token start,open,close,rankdir,end_stmt,lf;}{
+	start=<START> open=<OPEN> lf=<LF>
+	rankdir=<RANKDIR> end_stmt=<END_STMT> lf=<LF>
+	(Stmt())*
+	close=<CLOSE>
+}
+
+void Stmt():{Token state,open,close,comma,end_stmt,shape_eq,label_eq,shape,label,lf;}{	
+	state=<STATE> open=<OPEN_SQR> shape_eq=<SHAPE_EQ> shape=<SHAPE> comma=<COMMA> label_eq=<LABEL_EQ> label=<LABEL> close=<CLOSE_SQR> end_stmt=<END_STMT> lf=<LF>
+	(Trans())*
+	{
+		if(state.image.equals("initial")) return;
+		State s = states.get(state.image); 
+		if(s == null){
+			s = new State();
+			states.put(state.image,s);
+		}
+		if(shape.image.equals("double circle"))
+			s.setAccept(true);
+	}
+}
+
+void Trans():{Token state1,state2,trans,open,close,label_eq,label,lf;}{
+	state1=<STATE> trans=<TRANS> state2=<STATE> 
+	{
+		if(state1.image.equals("initial")){
+			State s = states.get(state2.image);
+			if(s == null){
+				s = new State();
+				states.put(state2.image,s);
+			}
+			initial_state = s;
+		}
+	}	
+	(
+		open=<OPEN_SQR> label_eq=<LABEL_EQ> label=<LABEL> close=<CLOSE_SQR>
+		{			
+			State s1 = states.get(state1.image);
+			State s2 = states.get(state2.image);
+			
+			if(s1 == null){
+				s1 = new State();
+				states.put(state1.image,s1);
+			}
+			
+			if(s2 == null){
+				s2 = new State();
+				states.put(state2.image,s2);
+			}
+			
+			Transition t = new Transition((char)label.image.getBytes()[1],s2);
+			s1.addTransition(t);			
+		}
+	)?
+	lf=<LF>
+	
+}

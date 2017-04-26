@@ -1,0 +1,4 @@
+B = read("../res/test2.dot");
+A = read("../res/test.dot");
+C = product(A,B);
+write(C,"../res/c.dot");
