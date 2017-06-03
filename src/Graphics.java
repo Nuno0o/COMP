@@ -8,7 +8,20 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.JPanel;
+import javax.swing.JDesktopPane;
+import javax.swing.JSplitPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import java.awt.Dimension;
 
+/*
+Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+pack();
+setSize(screenSize.width,screenSize.height);
+*/
 public class AutoanalyserWindow {
 
 	private JFrame frame;
@@ -19,6 +32,8 @@ public class AutoanalyserWindow {
 	private JButton btnGenerateJava;
 	private JButton btnCompile;
 	private JButton btnRun;
+	private JPanel panel;
+	private JTextField txtCodehere;
 
 	/**
 	 * Launch the application.
@@ -95,12 +110,21 @@ public class AutoanalyserWindow {
 		btnRun = new JButton("Run");
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				/*Class2 nw = new Class2();
-				nw.NewS*/
 			}
 		});
 		btnRun.setBounds(121, 352, 195, 25);
 		frame.getContentPane().add(btnRun);
+		
+		panel = new JPanel();
+		panel.setBounds(506, 84, 394, 243);
+		frame.getContentPane().add(panel);
+		
+		txtCodehere = new JTextField();
+		txtCodehere.setToolTipText("...\r\n");
+		txtCodehere.setText("CodeHere");
+		panel.add(txtCodehere);
+		txtCodehere.setColumns(30);
+		txtCodehere.setPreferredSize(new Dimension (220,220));
 	}
 }
+
