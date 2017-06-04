@@ -1,23 +1,32 @@
 import java.io.*;
 import java.util.*;
 import dk.brics.automaton.*;
+import java.nio.file.*;
 
 public class Utilities{
 
-	public static void info(Automato a1){
+	public static void info(Automaton a1){	
+
+		System.out.println("info():");
+	
+		System.out.print("\tType:");
+		if(!a1.isDeterministic()) System.out.print("Non-");
+		System.out.println("Deterministic");
+	
+		System.out.print("\tLanguage:");
+		if(a1.isTotal()){
+			System.out.println("All Strings");
+			return;
+		}	
+		if(a1.isEmptyString()){
+			System.out.println("Empty String");
+			return;
+		}		
 		if(a1.isEmpty()){
 			System.out.println("Empty Language");
 			return;
 		}
-		if(a1.isEmptyString()){
-			System.out.println("Empty String");
-			return;
-		}
-		if(a1.isEmptyString()){
-			System.out.println("All Strings");
-			return;
-		}
-
+		System.out.println("Other");
 	}
 
 	public static void compare(Automaton a1, Automaton a2){
@@ -25,6 +34,7 @@ public class Utilities{
 		if(ans) System.out.println("Same language");
 		else System.out.println("Different language");
 	}
+	
 	public static Automaton product(Automaton a1, Automaton a2){
 		Automaton a3 = new Automaton();
 
@@ -106,14 +116,20 @@ public class Utilities{
 	}
 
 	public static void test(Automaton a, File f){
-		RunAutomaton run_automaton = new RunAutomaton(a);
-		ArrayList<String> lines = FileUtils.readLines(f);
+		
+		Automaton b = a.clone();
+		b.removeDeadTransitions();
+		BasicOperations.determinize(b);		
+		RunAutomaton c = new RunAutomaton(b);
+		
+		try{
+		List<String> lines = new ArrayList<>(Files.readAllLines(f.toPath()));
 
 		for (String line : lines) {
 			System.out.print(line+":");
-			if(run_automaton.run(lines)) System.out.println("accepted");
-			else 	System.out.print("refused");
+			if(c.run(line)) System.out.println("Accepted");
+			else System.out.println("Rejected");
 		}
-
+		}catch(Exception e){e.printStackTrace();}
 	}
 }

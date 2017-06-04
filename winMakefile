@@ -1,6 +1,6 @@
 all:bin/Autoanalyze.java bin/DotParser.java
 	@mkdir -p bin
-	javac -d bin -cp "bin:lib/automaton.jar:lib/commons-io-2.5.jar:lib/commons-lang3-3.5.jar" bin/*.java src/*.java
+	javac -d bin -cp "bin;lib/automaton.jar;lib/commons-io-2.5.jar" bin/*.java src/*.java
 
 bin/Autoanalyze.java:src/Autoanalyze.jj
 	@mkdir -p bin
@@ -9,7 +9,7 @@ bin/Autoanalyze.java:src/Autoanalyze.jj
 
 bin/DotParser.java:src/DotParser.jj
 	@mkdir -p bin
-	java -cp "lib/javacc.jar:lib/commons-lang3-3.5.jar" javacc src/DotParser.jj
+	java -cp "lib/javacc.jar;lib/commons-lang3-3.5.jar" javacc src/DotParser.jj
 	@mv *.java bin
 
 clean:

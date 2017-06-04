@@ -22,8 +22,8 @@ public class Autoanalyze{
 	
 	public static void main(String[] args){
 		
-		if(args.length != 1){
-			System.out.println("Usage: java Autoanalyze <path_to_file>");
+		if(args.length != 1 && args.length != 3 || args.length == 3 && !args[1].equals("-d")){
+			System.out.println("Usage: java Autoanalyze <source_path> [-d <dest_path>]");
 			return;
 		}		
 		in = new File(args[0]);
@@ -31,16 +31,16 @@ public class Autoanalyze{
 		if(!in.exists() || !in.isFile()){
 			System.out.println("Invalid file: "+args[0]);
 			return;
-		}		
+		}	
 		
 		String file_name = in.getName();
-		//if(file_name.contains(".")){
-		//	file_name = in.getName().split(".")[0];
-		//}
+		
+		if(args.length == 3) out = new File(args[2]);
+		else out = new File(in.getParent()+"/"+file_name+".java");
 		
 		vars = new HashSet<String>();
 		str = "import dk.brics.automaton.*;\n";
-		str += "import org.apache.commons.io.*;\n";		
+		str += "import org.apache.commons.io.*;\n";
 		str += "import java.io.*;\n\n";
 		str += "public class " + file_name + "{\n";
 		str += "\tpublic static void main(String[] args){\n";
@@ -55,7 +55,6 @@ public class Autoanalyze{
 			str += "\t\t}catch(Exception e){e.printStackTrace();}\n\t}\n}";
 			System.out.println("Done!");
 			
-			File out = new File(in.getParent()+"/"+file_name+".java");
 			FileUtils.writeStringToFile(out,str);	
 			
 		}catch(Exception e){
@@ -180,7 +179,7 @@ void NAssign() throws Exception:{Token t1,t2;}{
 			<INFO> <OPEN> t1=<VAR>
 			{
 				hasAssignedValue(t1);
-				str += t1.image+".getInfo()";
+				str += "Utilities.info("+t1.image+")";
 			}
 		)|(
 			<WRITE> <OPEN> t1=<VAR> <COMMA> t2=<PATH>

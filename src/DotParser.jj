@@ -16,9 +16,13 @@ public class DotParser{
 	static HashMap<String,State> states;
 	static State initial_state;
 	static DotParser parser = null;
+	static boolean determinism;
+	static ArrayList<StatePair> epsilons;
 
 	public static Automaton fromDot(File f){
+		determinism = true;
 		automaton = null;
+		epsilons = new ArrayList<StatePair>();
 		states = new HashMap<String,State>();
 		initial_state = null;	
 		System.out.print("Parsing "+f.getName()+" ...");
@@ -31,6 +35,9 @@ public class DotParser{
 			System.out.println("Done!");
 			automaton = new Automaton();
 			automaton.setInitialState(initial_state);
+			automaton.restoreInvariant();
+			automaton.setDeterministic(determinism);
+			automaton.addEpsilons(epsilons);			
 			
 		}catch(Exception e){
 		System.out.println("Rejected!");
@@ -42,50 +49,57 @@ public class DotParser{
 
 PARSER_END(DotParser)
 
-SKIP:{" "|"\t"|"\r"}
+SKIP:{" "|"\t"|"\r"|"\n"}
 
 TOKEN:{
-<OPEN:"{">|
-<CLOSE:"}">|
 <OPEN_SQR:"[">|
 <CLOSE_SQR:"]">|
-<SHAPE_EQ:"shape=">|
+<SHAPE_EQ:"shape">|
 <SHAPE:("plaintext"|"circle"|"doublecircle")>|
-<LABEL_EQ:"label=">|
+<LABEL_EQ:"label">|
 <STATE:((["0"-"9"])+|"initial")>|
-<LABEL:("\"")(~[])?("\"")>|
-<RANKDIR:"rankdir = LR">|
+<EMPTY_LABEL:"\"\"">|
+<LABEL:("\""(((~["\""])("-"(~["\""]))?)|"&epsilon")"\"")>|
 <END_STMT:";">|
 <TRANS:"->">|
-<START:"digraph Automaton">|
 <COMMA:",">|
-<LF:"\n">
+<DIGRAPH:"digraph">|
+<AUTOMATON:"Automaton">|
+<RANKDIR:"rankdir">|
+<EQ:"=">|
+<LR:"LR">|
+<OPEN:"{">|
+<CLOSE:"}">
 }
 
-void Start():{Token start,open,close,rankdir,end_stmt,lf;}{
-	start=<START> open=<OPEN> lf=<LF>
-	rankdir=<RANKDIR> end_stmt=<END_STMT> lf=<LF>
+void Start():{}{
+	<DIGRAPH> <AUTOMATON> <OPEN>
+	<RANKDIR> <EQ> <LR> <END_STMT>
 	(Stmt())*
-	close=<CLOSE>
+	<CLOSE>
 }
 
-void Stmt():{Token state,open,close,comma,end_stmt,shape_eq,label_eq,shape,label,lf;}{	
-	state=<STATE> open=<OPEN_SQR> shape_eq=<SHAPE_EQ> shape=<SHAPE> comma=<COMMA> label_eq=<LABEL_EQ> label=<LABEL> close=<CLOSE_SQR> end_stmt=<END_STMT> lf=<LF>
-	(Trans())*
+void Stmt():{Token state,shape;}{	
+	state=<STATE> <OPEN_SQR> <SHAPE_EQ> <EQ> shape=<SHAPE> <COMMA> <LABEL_EQ> <EQ> <EMPTY_LABEL> <CLOSE_SQR> <END_STMT>
 	{
-		if(state.image.equals("initial")) return;
-		State s = states.get(state.image); 
-		if(s == null){
-			s = new State();
-			states.put(state.image,s);
+		if(!state.image.equals("initial")){
+		
+			State s = states.get(state.image); 
+			if(s == null){
+				s = new State();
+				states.put(state.image,s);
+			}
+			if(shape.image.equals("doublecircle")){
+				s.setAccept(true);
+			}
+			
 		}
-		if(shape.image.equals("double circle"))
-			s.setAccept(true);
 	}
+	(Trans())*
 }
 
-void Trans():{Token state1,state2,trans,open,close,label_eq,label,lf;}{
-	state1=<STATE> trans=<TRANS> state2=<STATE> 
+void Trans():{Token state1,state2,label;}{
+	state1=<STATE> <TRANS> state2=<STATE> 
 	{
 		if(state1.image.equals("initial")){
 			State s = states.get(state2.image);
@@ -97,7 +111,7 @@ void Trans():{Token state1,state2,trans,open,close,label_eq,label,lf;}{
 		}
 	}	
 	(
-		open=<OPEN_SQR> label_eq=<LABEL_EQ> label=<LABEL> close=<CLOSE_SQR>
+		<OPEN_SQR> <LABEL_EQ> <EQ> label=<LABEL> <CLOSE_SQR>
 		{			
 			State s1 = states.get(state1.image);
 			State s2 = states.get(state2.image);
@@ -112,10 +126,31 @@ void Trans():{Token state1,state2,trans,open,close,label_eq,label,lf;}{
 				states.put(state2.image,s2);
 			}
 			
-			Transition t = new Transition((char)label.image.getBytes()[1],s2);
-			s1.addTransition(t);			
+			if(label.image.contains("&epsilon")){
+				epsilons.add(new StatePair(s1,s2));
+				determinism = false;
+				return;
+			}
+			
+			Transition t1 = null;			
+			
+			if(label.image.contains("-")){				
+				t1 = new Transition(
+					label.image.charAt(1),
+					label.image.charAt(3),
+					s2
+					);
+			}
+			else t1 = new Transition(label.image.charAt(1),s2);			
+		
+			if(determinism)
+			for(Transition t2: s1.getTransitions()){
+				determinism &= t1.getMin() > t2.getMax() || t2.getMin() > t1.getMax();
+				if(!determinism) break;
+			}
+		
+			s1.addTransition(t1);
 		}
 	)?
-	lf=<LF>
 	
 }

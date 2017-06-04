@@ -1,4 +1,4 @@
-B = read("../res/test2.dot");
-A = read("../res/test.dot");
-C = product(A,B);
-write(C,"../res/c.dot");
+A = read("../res/e_nfa.dot");
+info(A);
+test(A,"../res/nfa");
+write(A,"../res/e_nfa_.dot");
