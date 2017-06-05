@@ -87,7 +87,9 @@ TOKEN:{
 <TEST:"test">|
 <COMPARE:"compare">|
 <INFO:"info">|
-<WRITE:"write">
+<WRITE:"write">|
+<MLCOMMENT:("/*"|"/*/") ( ~["/"] | (~["*"]"/") )* "*/">|
+<SLCOMMENT: "//"( ~["\n"])*"\n">
 }
 
 void Start() throws Exception:{}{
@@ -96,6 +98,7 @@ void Start() throws Exception:{}{
 }
 
 void Stmt() throws Exception:{}{
+	(<MLCOMMENT>||<SLCOMMENT>)?
 	{str += "\t\t\t";}
 	(Assign()|NAssign()) <END_STMT>
 	{str += ";\n";}
