@@ -8,14 +8,17 @@ suporte de NFA e e-NFA desta linguagem
 // nota: na pasta res/ estão as imagens
 // destes e de outros automatos em graphiz
 A = read("../res/nfa.dot");
-B = read("../res/e_nfa.dot");
 
 // a funcao info() testa o determinismo
 // e a linguagem aceite por um automato
 info(A);
-info(B);
 
 // a funcao test() testa todas as linhas
 // de um dicionario com um automato
 test(A,"../res/strings");
-test(B,"../res/strings");
+
+// repetir os procedimentos anteriores
+// mas agora para um e-NFA
+A = read("../res/e_nfa.dot");
+info(A);
+test(A,"../res/strings");

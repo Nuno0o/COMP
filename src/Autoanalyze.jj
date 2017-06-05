@@ -98,7 +98,7 @@ void Start() throws Exception:{}{
 }
 
 void Stmt() throws Exception:{}{
-	(<MLCOMMENT>||<SLCOMMENT>)?
+	(<MLCOMMENT>|<SLCOMMENT>)*
 	{str += "\t\t\t";}
 	(Assign()|NAssign()) <END_STMT>
 	{str += ";\n";}
