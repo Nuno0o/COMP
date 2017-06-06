@@ -3,7 +3,7 @@ echo "--------------------"
 cat ../res/operations_test
 echo "--------------------"
 java -cp ".:../lib/commons-io-2.5.jar" Autoanalyze ../res/operations_test > /dev/null
-javac -d . -cp ".:../lib/automaton.jar:../lib/commons-io-2.5.jar" ../res/operations_test.java
+javac -d . -cp ".:../lib/automaton.jar:../lib/commons-io-2.5.jar" ../res/operations_test.java > /dev/null
 rm ../res/operations_test.java
 read -p "Press ENTER to run the code ..." key
 echo "--------------------"

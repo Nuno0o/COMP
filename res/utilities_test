@@ -13,6 +13,8 @@ A = read("../res/empty_string.dot");
 // vazia ou a linguagem vazia
 info(A);
 
+test(A,"../res/strings");
+
 B = read("../res/empty_language.dot");
 info(B);
 

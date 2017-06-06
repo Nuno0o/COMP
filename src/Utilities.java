@@ -26,24 +26,28 @@ public class Utilities{
 			System.out.println("Empty Language");
 			return;
 		}
-		System.out.println("Other");
+		System.out.println("Non-empty language");
 	}
 
 	public static void compare(Automaton a1, Automaton a2){
 		
+		System.out.print("compare(X,Y):");
+
 		boolean a = BasicOperations.subsetOf(a1,a2);
 		boolean b = BasicOperations.subsetOf(a2,a1);
-		boolean c = a && b;
-		boolean d = a || b;
-		
-		a |= a1.isEmpty();
-		b |= a2.isEmpty();
-		
-		System.out.print("compare(X,Y):");		
-		if(c) System.out.println("Same language");
-		else if(d) System.out.println("Different languages");
-		else if(a) System.out.println("Y contains X");
-		else if(b) System.out.println("X contains Y");		
+
+		if(a1.isEmpty() && a2.isEmpty() || a && b)
+			System.out.println("Same language");
+		else if(a1.isEmpty() && !a2.isEmpty() || a && !b)
+			System.out.println("Y contains X");
+		else if(a2.isEmpty() && !a1.isEmpty() || !a && b)
+			System.out.println("X contains Y");
+		else{
+			Automaton a3 = BasicOperations.intersection(a1,a2);
+			String e = " with intersection";
+			if(a3.isEmpty()) e = " without intersection";
+			System.out.println("Different languages"+e);
+		}		
 		
 	}
 	
