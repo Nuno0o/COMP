@@ -6,13 +6,14 @@ as funcoes info() e compare()
 // nota: na pasta res/ estão as imagens
 // dos automatos usados em testes
 A = read("../res/empty_string.dot");
-B = read("../res/empty_language.dot");
 
 // a funcao info() verifica o
 // determinismo de um automato e
 // se este representa a cadeia
 // vazia ou a linguagem vazia
 info(A);
+
+B = read("../res/empty_language.dot");
 info(B);
 
 // a função compare() testa

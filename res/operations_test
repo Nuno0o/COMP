@@ -8,14 +8,14 @@ A = read("../res/multiples_of_2.dot");
 B = read("../res/multiples_of_3.dot");
 C = read("../res/multiples_of_5.dot");
 
-// multiplos de 3 nao pares OU
-// multiplos de 5 nao pares
+// multiplos de 3 mão pares OU
+// multiplos de 5 não pares
 D = difference(union(C,B),A);
 test(D,"../res/numbers");
 
-// multiplos de 3 E
-// não multiplos de 5
-E = intersection(B,complement(C));
+// multiplos de 2 E
+// não multiplos de 3
+E = intersection(A,complement(B));
 test(E,"../res/numbers");
 
 

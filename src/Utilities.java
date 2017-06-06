@@ -36,6 +36,9 @@ public class Utilities{
 		boolean c = a && b;
 		boolean d = a || b;
 		
+		a |= a1.isEmpty();
+		b |= a2.isEmpty();
+		
 		System.out.print("compare(X,Y):");		
 		if(c) System.out.println("Same language");
 		else if(d) System.out.println("Different languages");
