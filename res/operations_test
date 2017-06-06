@@ -8,8 +8,8 @@ A = read("../res/multiples_of_2.dot");
 B = read("../res/multiples_of_3.dot");
 C = read("../res/multiples_of_5.dot");
 
-// multiplos de 3 não pares OU
-// multiplos de 5 não pares
+// multiplos de 3 nao pares OU
+// multiplos de 5 nao pares
 D = difference(union(C,B),A);
 test(D,"../res/numbers");
 

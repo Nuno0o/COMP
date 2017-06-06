@@ -34,7 +34,7 @@ public class Utilities{
 		boolean a = BasicOperations.subsetOf(a1,a2);
 		boolean b = BasicOperations.subsetOf(a2,a1);
 		boolean c = a && b;
-		boold d = a || b;
+		boolean d = a || b;
 		
 		System.out.print("compare(X,Y):");		
 		if(c) System.out.println("Same language");
