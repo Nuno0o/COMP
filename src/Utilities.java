@@ -30,9 +30,18 @@ public class Utilities{
 	}
 
 	public static void compare(Automaton a1, Automaton a2){
-		boolean ans = BasicOperations.subsetOf(a1,a2) &&  BasicOperations.subsetOf(a2,a1);
-		if(ans) System.out.println("Same language");
-		else System.out.println("Different language");
+		
+		boolean a = BasicOperations.subsetOf(a1,a2);
+		boolean b = BasicOperations.subsetOf(a2,a1);
+		boolean c = a && b;
+		boold d = a || b;
+		
+		System.out.print("compare(X,Y):");		
+		if(c) System.out.println("Same language");
+		else if(d) System.out.println("Different languages");
+		else if(a) System.out.println("Y contains X");
+		else if(b) System.out.println("X contains Y");		
+		
 	}
 	
 	public static Automaton product(Automaton a1, Automaton a2){
@@ -124,9 +133,9 @@ public class Utilities{
 		
 		try{
 		List<String> lines = new ArrayList<>(Files.readAllLines(f.toPath()));
-
+		System.out.println("test():");
 		for (String line : lines) {
-			System.out.print(line+":");
+			System.out.print("\t"+line+":");
 			if(c.run(line)) System.out.println("Accepted");
 			else System.out.println("Rejected");
 		}

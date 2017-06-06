@@ -1,0 +1,26 @@
+/*
+este exemplo serve para demonstrar
+as operacoes de automatos implementadas
+e a escrita de automatos em ficheiros
+*/
+
+A = read("../res/multiples_of_2.dot");
+B = read("../res/multiples_of_3.dot");
+C = read("../res/multiples_of_5.dot");
+
+// multiplos de 3 não pares OU
+// multiplos de 5 não pares
+D = difference(union(C,B),A);
+test(D,"../res/numbers");
+
+// multiplos de 3 E
+// não multiplos de 5
+E = intersection(B,complement(C));
+test(E,"../res/numbers");
+
+
+// tambem foram implementadas as
+// operacoes de concatenacao e 
+// produto escalar
+F = concatenation(product(A,B),C);
+write(F,"../res/test_automata.dot");
